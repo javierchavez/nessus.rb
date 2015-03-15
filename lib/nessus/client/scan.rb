@@ -61,6 +61,18 @@ module Nessus
         post "/scans/#{scan_id}/pause"
       end
 
+
+      # POST /scans/{scan_id}/export
+      #
+      # @param [integer] scan_id id of the scan to export.
+      # @param [string] format file format to use (Nessus, HTML, PDF, CSV, or DB).
+      #
+      # @return 
+      def scan_export(scan_id, format)
+        post "/scans/#{scan_id}/export"
+      end
+
+      
       # POST /scans/{scan_id}/resume
       #
       # @param [integer] scan_id unique identifier for the scan
@@ -68,6 +80,15 @@ module Nessus
       # @return status OK if successful
       def scan_resume(scan_id)
         post "/scans/#{scan_id}/resume"
+      end
+
+      # POST /scans/{scan_id}/launch
+      #
+      # @param [integer] scan_id id of the scan to launch
+      #
+      # @return status OK if successful
+      def scan_launch(scan_id)
+        post "/scans/#{scan_id}/launch"
       end
 
       # POST /scan/template/new
