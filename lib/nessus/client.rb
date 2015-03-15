@@ -60,7 +60,7 @@ module Nessus
       resp = JSON.parse(resp.body)
 
       if resp.has_key?("token")
-        connection.headers['X-Cookie'] = "token=#resp['token']}"
+        connection.headers['X-Cookie'] = "token=#{resp['token']}"
         true
       else
         false
@@ -93,7 +93,7 @@ module Nessus
 
     def authenticated?
       headers = connection.headers
-      !!headers[:cookie] && headers[:cookie].include?('token=')
+      !!headers['X-Cookie'] && headers['X-Cookie'].include?('token=')
     end
 
     # @param [String] url the URL/path to send a GET request using the
@@ -103,6 +103,8 @@ module Nessus
     def get(url, params = {}, headers = {})
       retries ||= 0
 
+      puts connection.headers
+      
       unless authenticated?
         fail Nessus::Unauthorized, 'Unable to detect a session token cookie, use #authenticate before sending any other requests'
       end
