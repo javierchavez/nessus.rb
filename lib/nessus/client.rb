@@ -11,7 +11,6 @@ require 'nessus/version'
 
 module Nessus
   # @author Erran Carey <me@errancarey.com>
-  # updated by @author Javier <javierc@unm.edu>
   class Client
     include Nessus::Client::File
     include Nessus::Client::Policy
@@ -28,7 +27,6 @@ module Nessus
     # @!attribute connection
     #   @return [Faraday::Connection]
     attr_reader :connection
-    
 
     # @param [String] host the base URL to use when connecting to the Nessus API
     def initialize(host, login = nil, password = nil, connection_options = {})
@@ -51,22 +49,20 @@ module Nessus
     def authenticate(login, password)
       @login    = login
       @password = password
-      
+
       payload = {
-        :username => login,
+        :login => login,
         :password => password,
         :json => 1,
       }
-      resp = connection.post '/session', payload
+      resp = connection.post '/login', payload
       resp = JSON.parse(resp.body)
 
-      if resp.has_key?("token")
-        connection.headers['X-Cookie'] = "token=#{resp['token']}"
-        true
-      else
-        false
+      if resp['reply']['status'].eql? 'OK'
+        connection.headers[:cookie] = "token=#{resp['reply']['contents']['token']}"
       end
-      
+
+      true
     end
     alias_method :login, :authenticate
 
@@ -94,7 +90,7 @@ module Nessus
 
     def authenticated?
       headers = connection.headers
-      !!headers['X-Cookie'] && headers['X-Cookie'].include?('token=')
+      !!headers[:cookie] && headers[:cookie].include?('token=')
     end
 
     # @param [String] url the URL/path to send a GET request using the
@@ -103,7 +99,7 @@ module Nessus
     # @param [Hash] headers the headers to send along with the request
     def get(url, params = {}, headers = {})
       retries ||= 0
-      
+
       unless authenticated?
         fail Nessus::Unauthorized, 'Unable to detect a session token cookie, use #authenticate before sending any other requests'
       end
@@ -111,8 +107,6 @@ module Nessus
       params ||= {}
       params[:json] = 1
 
-      
-      
       resp    = connection.get url, params, headers
       fail Nessus::Unauthorized if resp.status == 401
       fail Nessus::Forbidden if resp.status == 403
@@ -146,7 +140,6 @@ module Nessus
       fail Nessus::Unauthorized if resp.status == 401
       fail Nessus::Forbidden if resp.status == 403
 
-      #needs better implementation because now status' have more meaning, we should incl them.
       JSON.parse(resp.body)
     rescue Nessus::Unauthorized, Nessus::Forbidden
       if retries < 1

@@ -1,94 +1,68 @@
 module Nessus
   class Client
     # @author Erran Carey <me@errancarey.com>
-    # updated by @author Javier <javierc@unm.edu>
     module Scan
-      # POST /scans
+      # POST /scan/new
       #
-      # @param [String] The uuid for the editor template to use.
       # @param [String] target a string that contains the scan target(s)
       # @param [Fixnum] policy_id a numeric ID that references the policy to use
       # @param [String] scan_name the name to assign to this scan
       # @param [Fixnum] seq a unique identifier for the specific request
       #
       # @return [Hash] the newly created scan object
-      def scan_new(uuid, target, policy_id, scan_name, enabled, other=nil)
+      def scan_new(target, policy_id, scan_name, seq = nil, description = nil)
         payload = {
-          :uuid => uuid,
-          :settings => {
-            :enabled => enabled,
-            :text_targets => target,
-            :policy_id => policy_id,
-            :name => scan_name
-          }
+          :custom_targets => target,
+          :policy_id => policy_id,
+          :name => scan_name
         }
-        if other
-          payload.merge(other)
+        payload[:seq] = seq if seq
+        payload[:description] = description if description
+        response = post '/scan/new', payload
+
+        if response['error']
+          raise Nessus::UnknownError, response['error']
         end
 
-        post '/scans', payload
-
-        # if  response['error']
-        #   raise Nessus::UnknownError, response['error']
-        # end
-
-        # response['reply']['contents'] # ['scan']
+        response['reply']['contents'] # ['scan']
       end
 
-      # GET /scans
+      # GET /scan/list
       #
       # @return [Array<Hash>] an array of scan hashes
       def scan_list
-        response = get '/scans'
-        response['scans']
+        response = get '/scan/list'
+        response['reply']['contents']
       end
 
-      # POST /scans/{scan_id}/stop
+      # POST /scan/stop
       #
-      # @param [integer] scan_id unique identifier for the scan
+      # @param [String] scan_uuid unique identifier for the scan
       #
       # @return status OK if successful
-      def scan_stop(scan_id)
-        post "/scans/#{scan_id}/stop"
+      def scan_stop(scan_uuid)
+        response = post '/scan/stop', :scan_uuid => scan_uuid
+        response['reply']['contents']
       end
 
-      # POST /scans/{scan_id}/pause
+      # POST /scan/pause
       #
-      # @param [integer] scan_id unique identifier for the scan
+      # @param [String] scan_uuid unique identifier for the scan
       #
       # @return status OK if successful
-      def scan_pause(scan_id)
-        post "/scans/#{scan_id}/pause"
+      def scan_pause(scan_uuid)
+        response = post '/scan/pause', :scan_uuid => scan_uuid
+        response['reply']['contents']
       end
 
-
-      # POST /scans/{scan_id}/export
+      # POST /scan/resume
       #
-      # @param [integer] scan_id id of the scan to export.
-      # @param [string] format file format to use (Nessus, HTML, PDF, CSV, or DB).
-      #
-      # @return 
-      def scan_export(scan_id, format)
-        post "/scans/#{scan_id}/export"
-      end
-
-      
-      # POST /scans/{scan_id}/resume
-      #
-      # @param [integer] scan_id unique identifier for the scan
+      # @param [String] scan_uuid unique identifier for the scan
       #
       # @return status OK if successful
-      def scan_resume(scan_id)
-        post "/scans/#{scan_id}/resume"
-      end
-
-      # POST /scans/{scan_id}/launch
-      #
-      # @param [integer] scan_id id of the scan to launch
-      #
-      # @return status OK if successful
-      def scan_launch(scan_id)
-        post "/scans/#{scan_id}/launch"
+      def scan_resume(scan_uuid)
+        response = post '/scan/resume', :scan_uuid => scan_uuid
+        response['reply']['contents']
       end
 
       # POST /scan/template/new
@@ -99,7 +73,6 @@ module Nessus
       #
       # @return status OK if successful
       def scan_template_new(template_name, policy_id, target, seq = nil, start_time = nil, rrules = nil)
-        raise NotImplementedError
         payload = {
           :template_name => template_name,
           :policy_id => policy_id,
