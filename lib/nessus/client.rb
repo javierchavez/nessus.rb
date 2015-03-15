@@ -102,8 +102,6 @@ module Nessus
     # @param [Hash] headers the headers to send along with the request
     def get(url, params = {}, headers = {})
       retries ||= 0
-
-      puts connection.headers
       
       unless authenticated?
         fail Nessus::Unauthorized, 'Unable to detect a session token cookie, use #authenticate before sending any other requests'
@@ -114,7 +112,7 @@ module Nessus
 
       
       
-      resp    = connection.get url, params, connection.headers
+      resp    = connection.get url, params, headers
       fail Nessus::Unauthorized if resp.status == 401
       fail Nessus::Forbidden if resp.status == 403
 
@@ -147,6 +145,7 @@ module Nessus
       fail Nessus::Unauthorized if resp.status == 401
       fail Nessus::Forbidden if resp.status == 403
 
+      #needs better implementation because now status' have more meaning, we should incl them.
       JSON.parse(resp.body)
     rescue Nessus::Unauthorized, Nessus::Forbidden
       if retries < 1
