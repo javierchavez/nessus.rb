@@ -1,4 +1,5 @@
 # Nessus
+[![Build Status](https://travis-ci.org/javierchavez/nessus.rb.svg)](https://travis-ci.org/javierchavez/nessus.rb)
 
 TODO: Write a gem description
 
@@ -18,7 +19,34 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+require gems 
+
+```ruby
+	require 'rubygems'
+	require 'nessus'
+```	
+
+Connecting using a SSL cert 
+
+
+```ruby
+	# create a client, but dont login yet.
+    # nil nil are username and password respectivly.
+	client = Nessus::Client.new(
+	    "https://00.10.010.110:8834", 
+    	nil, 
+	    nil, 
+    	{ ssl: { :ca_file => '~/dir/01.11.191.17.cer'}})	
+        
+    
+    # now login
+    client.login("user", "pwd") 
+    
+    # Check if authenticated
+    puts client.authenticated? 
+    
+```
+
 
 ## Contributing
 
