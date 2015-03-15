@@ -11,6 +11,7 @@ require 'nessus/version'
 
 module Nessus
   # @author Erran Carey <me@errancarey.com>
+  # updated by @author Javier <javierc@unm.edu>
   class Client
     include Nessus::Client::File
     include Nessus::Client::Policy

@@ -1,6 +1,7 @@
 module Nessus
   class Client
     # @author Erran Carey <me@errancarey.com>
+    # updated by @author Javier <javierc@unm.edu>
     module Policy
 
       
