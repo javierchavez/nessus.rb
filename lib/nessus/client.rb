@@ -27,6 +27,7 @@ module Nessus
     # @!attribute connection
     #   @return [Faraday::Connection]
     attr_reader :connection
+    
 
     # @param [String] host the base URL to use when connecting to the Nessus API
     def initialize(host, login = nil, password = nil, connection_options = {})
@@ -49,20 +50,22 @@ module Nessus
     def authenticate(login, password)
       @login    = login
       @password = password
-
+      
       payload = {
-        :login => login,
+        :username => login,
         :password => password,
         :json => 1,
       }
-      resp = connection.post '/login', payload
+      resp = connection.post '/session', payload
       resp = JSON.parse(resp.body)
 
-      if resp['reply']['status'].eql? 'OK'
-        connection.headers[:cookie] = "token=#{resp['reply']['contents']['token']}"
+      if resp.has_key?("token")
+        connection.headers['X-Cookie'] = "token=#resp['token']}"
+        true
+      else
+        false
       end
-
-      true
+      
     end
     alias_method :login, :authenticate
 
@@ -107,7 +110,9 @@ module Nessus
       params ||= {}
       params[:json] = 1
 
-      resp    = connection.get url, params, headers
+      
+      
+      resp    = connection.get url, params, connection.headers
       fail Nessus::Unauthorized if resp.status == 401
       fail Nessus::Forbidden if resp.status == 403
 

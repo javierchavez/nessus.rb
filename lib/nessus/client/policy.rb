@@ -2,10 +2,12 @@ module Nessus
   class Client
     # @author Erran Carey <me@errancarey.com>
     module Policy
-      # GET /policy/list
+
+      
+      # GET /policy
       def policy_list
-        response = get '/policy/list'
-        response['reply']['contents']['policies']['policy']
+        response = get '/policies'
+        response
       end
 
       # @!group Policy Auxiliary Methods
