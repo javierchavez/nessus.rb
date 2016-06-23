@@ -36,7 +36,7 @@ Connecting using a SSL cert
 	    "https://00.10.010.110:8834", 
     	nil, 
 	    nil, 
-    	{ ssl: { :ca_file => '~/dir/01.11.191.17.cer'}})	
+    	{ ssl: { :ca_file => '/path/to/cacert.pem'}})	
         
     
     # now login
@@ -46,6 +46,7 @@ Connecting using a SSL cert
     puts client.authenticated? 
     
 ```
+Where /path/to/cacert.pem is the full path to a local copy of /opt/nessus/com/nessus/CA/cacert.pem on the machine running the Nessus server
 
 
 ## Contributing
